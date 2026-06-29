@@ -1,0 +1,115 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: #f2e9d8;
+}
+
+::selection {
+  background: #c8a87c;
+  color: #fff;
+}
+
+@keyframes slotFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---- hover interactions ported from the design's style-hover attributes ---- */
+
+.cta-primary {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.cta-primary:hover {
+  background: #9c7a4e !important;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(156, 122, 78, 0.4);
+}
+
+.product-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.4s ease;
+}
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 50px rgba(120, 92, 48, 0.18);
+}
+
+.add-btn {
+  transition: background 0.25s ease;
+}
+.add-btn:hover {
+  background: #9c7a4e !important;
+}
+
+.nav-link {
+  transition: color 0.2s ease;
+}
+.nav-link:hover {
+  color: #2f2820;
+}
+
+.outline-btn {
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.outline-btn:hover {
+  background: #c8a87c;
+  color: #fff;
+}
+
+.cat-tile image,
+.cat-tile .cat-img {
+  transition: transform 0.6s ease;
+}
+.cat-tile:hover .cat-img {
+  transform: scale(1.05);
+}
