@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
@@ -21,13 +22,17 @@ type Product = {
   stock: number;
   tag: string;
   ph: string;
+  img?: string;
+  href?: string;
 };
 
+const HERO_IMG = "/product_image/necklace.jpeg";
+
 const CATALOG: Product[] = [
+  { id: "om", slot: "p-om", name: "Om Pendant Chain", desc: "Oxidised silver ॐ on a box chain.", price: 2999, mrp: 3999, stock: 4, tag: "View in 3D ◈", ph: "Om pendant", img: HERO_IMG, href: "/product" },
   { id: "amethyst", slot: "p-amethyst", name: "Amethyst Cluster", desc: "Raw geode for calm & clarity.", price: 3999, mrp: 5499, stock: 2, tag: "Best seller", ph: "Amethyst cluster" },
   { id: "sage", slot: "p-sage", name: "White Sage Bundle", desc: "Sustainably harvested smudge stick.", price: 1199, mrp: 1499, stock: 8, tag: "Restocked", ph: "Sage bundle" },
   { id: "candle", slot: "p-candle", name: "Moonlight Candle", desc: "Soy wax, sandalwood & myrrh.", price: 2499, mrp: 2999, stock: 5, tag: "New", ph: "Soy candle" },
-  { id: "rose", slot: "p-rose", name: "Rose Quartz Set", desc: "Three tumbled stones of love.", price: 1899, mrp: 2499, stock: 3, tag: "Loved", ph: "Rose quartz" },
 ];
 
 const money = (n: number) => "₹" + n.toLocaleString("en-IN");
@@ -80,11 +85,55 @@ export default function Home() {
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
     };
+  }, []);
+
+  // scroll progress bar + sticky-nav shadow (rAF-throttled, no re-renders)
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - doc.clientHeight;
+        const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
+        if (progressRef.current) progressRef.current.style.width = pct + "%";
+        if (navRef.current) navRef.current.classList.toggle("scrolled", doc.scrollTop > 12);
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // scroll-reveal: fade sections in as they enter the viewport
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+    if (!("IntersectionObserver" in window)) {
+      els.forEach((el) => el.classList.add("in-view"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in-view");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
   const showToast = (text: string) => {
@@ -133,6 +182,9 @@ export default function Home() {
         overflowX: "hidden",
       }}
     >
+      {/* scroll progress bar */}
+      <div ref={progressRef} className="scroll-progress" />
+
       {/* announcement marquee */}
       <div style={{ background: "#3D352A", color: "#EBDFC9", overflow: "hidden", whiteSpace: "nowrap" }}>
         <div style={{ display: "inline-flex", animation: "marquee 32s linear infinite", willChange: "transform" }}>
@@ -153,23 +205,25 @@ export default function Home() {
       </div>
 
       {/* nav */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
-        <div style={{ display: "flex", gap: 38, alignItems: "center", fontSize: 14, letterSpacing: "0.6px", fontWeight: 400 }}>
-          <a className="nav-link" href="#shop" style={{ color: "#5A4F40", textDecoration: "none" }}>Shop</a>
-          <a className="nav-link" href="#crystals" style={{ color: "#5A4F40", textDecoration: "none" }}>Crystals</a>
-          <a className="nav-link" href="#ritual" style={{ color: "#5A4F40", textDecoration: "none" }}>Ritual</a>
-          <Link className="nav-link" href="/product" style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}>3D View ◈</Link>
-        </div>
-        <a href="#" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</a>
-        <div style={{ display: "flex", gap: 26, alignItems: "center" }}>
-          <span style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Search</span>
-          <span style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Account</span>
-          <button onClick={() => setCartOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#3D352A", display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
-            Cart
-            <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
-          </button>
-        </div>
-      </nav>
+      <div ref={navRef} className="site-nav">
+        <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 48px", maxWidth: 1280, margin: "0 auto" }}>
+          <div style={{ display: "flex", gap: 38, alignItems: "center", fontSize: 14, letterSpacing: "0.6px", fontWeight: 400 }}>
+            <a className="nav-link" href="#shop" style={{ color: "#5A4F40", textDecoration: "none" }}>Shop</a>
+            <a className="nav-link" href="#crystals" style={{ color: "#5A4F40", textDecoration: "none" }}>Crystals</a>
+            <a className="nav-link" href="#ritual" style={{ color: "#5A4F40", textDecoration: "none" }}>Ritual</a>
+            <Link className="nav-link" href="/product" style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}>3D View ◈</Link>
+          </div>
+          <a href="#" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</a>
+          <div style={{ display: "flex", gap: 26, alignItems: "center" }}>
+            <span style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Search</span>
+            <span style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Account</span>
+            <button onClick={() => setCartOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#3D352A", display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
+              Cart
+              <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
+            </button>
+          </div>
+        </nav>
+      </div>
 
       {/* hero */}
       <section style={{ maxWidth: 1280, margin: "0 auto", padding: "34px 48px 70px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 70, alignItems: "center" }}>
@@ -205,16 +259,25 @@ export default function Home() {
           <div style={{ position: "absolute", width: 420, height: 420, top: 40, left: "50%", transform: "translateX(-50%)", background: "radial-gradient(circle, rgba(228,193,136,0.55) 0%, rgba(228,193,136,0) 68%)", borderRadius: "50%", zIndex: 0, animation: "glowPulse 7s ease-in-out infinite", pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: -18, background: "linear-gradient(160deg, #ECDFC4 0%, #E0CFA9 100%)", borderRadius: "220px 220px 12px 12px", zIndex: 0, boxShadow: "0 30px 70px rgba(120,92,48,0.22)" }} />
           <div style={{ position: "absolute", inset: -10, border: "1px solid rgba(180,138,79,0.45)", borderRadius: "214px 214px 10px 10px", zIndex: 2, pointerEvents: "none" }} />
-          <ImageSlot placeholder="Hero image — crystals & candle on linen" radius={200} style={{ position: "relative", zIndex: 1, width: "100%", height: 560, borderRadius: "200px 200px 10px 10px" }} />
-          <div style={{ position: "absolute", zIndex: 2, bottom: 26, left: -28, background: "#F6EFE2", padding: "16px 22px", borderRadius: 4, boxShadow: "0 12px 40px rgba(61,53,42,0.14)" }}>
-            <div style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#B5894F" }}>Best seller</div>
-            <div style={{ fontFamily: SERIF, fontSize: 21, color: "#2F2820", marginTop: 3 }}>Amethyst Cluster</div>
-          </div>
+          <Link href="/product" style={{ display: "block", position: "relative", zIndex: 1, width: "100%", height: 560, borderRadius: "200px 200px 10px 10px", overflow: "hidden" }}>
+            <Image
+              src={HERO_IMG}
+              alt="Om Pendant Chain"
+              fill
+              priority
+              sizes="(max-width: 900px) 100vw, 50vw"
+              style={{ objectFit: "cover" }}
+            />
+          </Link>
+          <Link href="/product" style={{ textDecoration: "none", position: "absolute", zIndex: 2, bottom: 26, left: -28, background: "#F6EFE2", padding: "16px 22px", borderRadius: 4, boxShadow: "0 12px 40px rgba(61,53,42,0.14)" }}>
+            <div style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#B5894F" }}>Best seller · 3D view ◈</div>
+            <div style={{ fontFamily: SERIF, fontSize: 21, color: "#2F2820", marginTop: 3 }}>Om Pendant Chain</div>
+          </Link>
         </div>
       </section>
 
       {/* trust strip */}
-      <section style={{ borderTop: "1px solid #E3D6BD", borderBottom: "1px solid #E3D6BD", background: "#F1E7D4" }}>
+      <section className="reveal" style={{ borderTop: "1px solid #E3D6BD", borderBottom: "1px solid #E3D6BD", background: "#F1E7D4" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "26px 48px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 30 }}>
           {[
             ["Ethically Sourced", "Traceable to the mine"],
@@ -231,7 +294,7 @@ export default function Home() {
       </section>
 
       {/* products */}
-      <section id="shop" style={{ maxWidth: 1280, margin: "0 auto", padding: "90px 48px 40px" }}>
+      <section id="shop" className="reveal" style={{ maxWidth: 1280, margin: "0 auto", padding: "90px 48px 40px" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 14 }}>Curated for you</p>
           <h2 style={{ fontFamily: SERIF, fontSize: 48, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.5px" }}>The best sellers</h2>
@@ -242,13 +305,28 @@ export default function Home() {
             const lowStock = p.stock <= 3;
             return (
               <div key={p.id} className="product-card" style={{ background: "#FBF6EC", borderRadius: 4, overflow: "hidden", border: "1px solid #EADFC9", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(120,92,48,0.04)" }}>
-                <div style={{ position: "relative", background: "#EDE2CC" }}>
-                  <ImageSlot placeholder={p.ph} style={{ width: "100%", height: 280 }} />
-                  <span style={{ position: "absolute", top: 12, left: 12, background: "#F6EFE2", color: "#9C7A4E", fontSize: "10.5px", letterSpacing: "1.5px", textTransform: "uppercase", padding: "5px 10px", borderRadius: 2, fontWeight: 500 }}>{p.tag}</span>
-                  <span style={{ position: "absolute", top: 12, right: 12, background: "#9C5A3C", color: "#fff", fontSize: 11, letterSpacing: "0.5px", padding: "5px 9px", borderRadius: 2, fontWeight: 500 }}>{pct}</span>
-                </div>
+                {(() => {
+                  const media = (
+                    <div style={{ position: "relative", background: "#EDE2CC", overflow: "hidden" }}>
+                      {p.img ? (
+                        <Image src={p.img} alt={p.name} width={400} height={280} style={{ width: "100%", height: 280, objectFit: "cover", display: "block" }} />
+                      ) : (
+                        <ImageSlot placeholder={p.ph} style={{ width: "100%", height: 280 }} />
+                      )}
+                      <span style={{ position: "absolute", top: 12, left: 12, background: "#F6EFE2", color: "#9C7A4E", fontSize: "10.5px", letterSpacing: "1.5px", textTransform: "uppercase", padding: "5px 10px", borderRadius: 2, fontWeight: 500 }}>{p.tag}</span>
+                      <span style={{ position: "absolute", top: 12, right: 12, background: "#9C5A3C", color: "#fff", fontSize: 11, letterSpacing: "0.5px", padding: "5px 9px", borderRadius: 2, fontWeight: 500 }}>{pct}</span>
+                    </div>
+                  );
+                  return p.href ? (
+                    <Link href={p.href} style={{ display: "block", textDecoration: "none" }}>{media}</Link>
+                  ) : media;
+                })()}
                 <div style={{ padding: "20px 20px 22px", display: "flex", flexDirection: "column", flex: 1 }}>
-                  <div style={{ fontFamily: SERIF, fontSize: 22, color: "#2F2820", lineHeight: 1.2 }}>{p.name}</div>
+                  {p.href ? (
+                    <Link href={p.href} className="nav-link" style={{ fontFamily: SERIF, fontSize: 22, color: "#2F2820", lineHeight: 1.2, textDecoration: "none" }}>{p.name}</Link>
+                  ) : (
+                    <div style={{ fontFamily: SERIF, fontSize: 22, color: "#2F2820", lineHeight: 1.2 }}>{p.name}</div>
+                  )}
                   <div style={{ fontSize: 13, color: "#8A7E6C", fontWeight: 300, marginTop: 5, lineHeight: 1.5, flex: 1 }}>{p.desc}</div>
                   <div style={{ marginTop: 16 }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -271,7 +349,7 @@ export default function Home() {
       </section>
 
       {/* categories */}
-      <section id="crystals" style={{ maxWidth: 1280, margin: "0 auto", padding: "70px 48px 90px" }}>
+      <section id="crystals" className="reveal" style={{ maxWidth: 1280, margin: "0 auto", padding: "70px 48px 90px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 22, height: 420 }}>
           <div className="cat-tile" style={{ position: "relative", borderRadius: 4, overflow: "hidden" }}>
             <ImageSlot placeholder="Crystals shelf photo" style={{ width: "100%", height: "100%" }} />
@@ -298,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* ritual story */}
-      <section id="ritual" style={{ background: "#ECE0C9" }}>
+      <section id="ritual" className="reveal" style={{ background: "#ECE0C9" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "90px 48px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 70, alignItems: "center" }}>
           <ImageSlot placeholder="A calm ritual / hands photo" radius={6} style={{ width: "100%", height: 460 }} />
           <div>
@@ -311,7 +389,7 @@ export default function Home() {
       </section>
 
       {/* testimonial */}
-      <section style={{ position: "relative", background: "radial-gradient(900px 500px at 50% 0%, #4A4030 0%, #2F2820 60%)", overflow: "hidden" }}>
+      <section className="reveal" style={{ position: "relative", background: "radial-gradient(900px 500px at 50% 0%, #4A4030 0%, #2F2820 60%)", overflow: "hidden" }}>
         <div style={{ position: "absolute", width: 500, height: 500, top: -180, left: "50%", transform: "translateX(-50%)", background: "radial-gradient(circle, rgba(200,168,124,0.22) 0%, rgba(200,168,124,0) 70%)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: 860, margin: "0 auto", padding: "110px 48px", textAlign: "center" }}>
           <div style={{ fontSize: 22, letterSpacing: "5px", color: "#E4C188", marginBottom: 30 }}>★★★★★</div>
@@ -321,7 +399,7 @@ export default function Home() {
       </section>
 
       {/* newsletter CTA */}
-      <section style={{ background: "#3D352A" }}>
+      <section className="reveal" style={{ background: "#3D352A" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", padding: "80px 48px", textAlign: "center" }}>
           <h2 style={{ fontFamily: SERIF, fontSize: 42, fontWeight: 500, color: "#F6EFE2", marginBottom: 16 }}>Join the inner circle</h2>
           <p style={{ fontSize: "15.5px", color: "#C7B998", fontWeight: 300, marginBottom: 34 }}>15% off your first order, moon-phase ritual notes, and early access to new drops.</p>
