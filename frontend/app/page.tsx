@@ -30,9 +30,9 @@ const HERO_IMG = "/product_image/necklace.jpeg";
 
 const CATALOG: Product[] = [
   { id: "om", slot: "p-om", name: "Om Pendant Chain", desc: "Oxidised silver ॐ on a box chain.", price: 2999, mrp: 3999, stock: 4, tag: "View in 3D ◈", ph: "Om pendant", img: HERO_IMG, href: "/product" },
-  { id: "amethyst", slot: "p-amethyst", name: "Amethyst Cluster", desc: "Raw geode for calm & clarity.", price: 3999, mrp: 5499, stock: 2, tag: "Best seller", ph: "Amethyst cluster" },
-  { id: "sage", slot: "p-sage", name: "White Sage Bundle", desc: "Sustainably harvested smudge stick.", price: 1199, mrp: 1499, stock: 8, tag: "Restocked", ph: "Sage bundle" },
-  { id: "candle", slot: "p-candle", name: "Moonlight Candle", desc: "Soy wax, sandalwood & myrrh.", price: 2499, mrp: 2999, stock: 5, tag: "New", ph: "Soy candle" },
+  { id: "amethyst", slot: "p-amethyst", name: "Amethyst Cluster", desc: "Raw geode for calm & clarity.", price: 3999, mrp: 5499, stock: 2, tag: "Best seller", ph: "Amethyst cluster", img: "/product_image/amethyst-cluster.jpg" },
+  { id: "sage", slot: "p-sage", name: "White Sage Bundle", desc: "Sustainably harvested smudge stick.", price: 1199, mrp: 1499, stock: 8, tag: "Restocked", ph: "Sage bundle", img: "/product_image/white-sage-bundle.webp" },
+  { id: "candle", slot: "p-candle", name: "Moonlight Candle", desc: "Soy wax, sandalwood & myrrh.", price: 2499, mrp: 2999, stock: 5, tag: "New", ph: "Soy candle", img: "/product_image/moonlight-candle.webp" },
 ];
 
 const money = (n: number) => "₹" + n.toLocaleString("en-IN");
@@ -352,7 +352,7 @@ export default function Home() {
       <section id="crystals" className="reveal" style={{ maxWidth: 1280, margin: "0 auto", padding: "70px 48px 90px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 22, height: 420 }}>
           <div className="cat-tile" style={{ position: "relative", borderRadius: 4, overflow: "hidden" }}>
-            <ImageSlot placeholder="Crystals shelf photo" style={{ width: "100%", height: "100%" }} />
+            <Image src="/product_image/crystals-stones.jpeg" alt="Crystals & Stones" fill className="cat-img" sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(47,40,32,0.55), transparent 55%)", display: "flex", alignItems: "flex-end", padding: 32 }}>
               <div>
                 <div style={{ fontFamily: SERIF, fontSize: 34, color: "#fff" }}>Crystals & Stones</div>
@@ -361,13 +361,13 @@ export default function Home() {
             </div>
           </div>
           <div className="cat-tile" style={{ position: "relative", borderRadius: 4, overflow: "hidden" }}>
-            <ImageSlot placeholder="Candles" style={{ width: "100%", height: "100%" }} />
+            <Image src="/product_image/candles.jpeg" alt="Candles" fill className="cat-img" sizes="(max-width: 900px) 100vw, 25vw" style={{ objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(47,40,32,0.55), transparent 55%)", display: "flex", alignItems: "flex-end", padding: 26 }}>
               <div style={{ fontFamily: SERIF, fontSize: 26, color: "#fff" }}>Candles</div>
             </div>
           </div>
           <div className="cat-tile" style={{ position: "relative", borderRadius: 4, overflow: "hidden" }}>
-            <ImageSlot placeholder="Incense & sage" style={{ width: "100%", height: "100%" }} />
+            <Image src="/product_image/incense-sage.jpeg" alt="Incense & Sage" fill className="cat-img" sizes="(max-width: 900px) 100vw, 25vw" style={{ objectFit: "cover" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(47,40,32,0.55), transparent 55%)", display: "flex", alignItems: "flex-end", padding: 26 }}>
               <div style={{ fontFamily: SERIF, fontSize: 26, color: "#fff" }}>Incense & Sage</div>
             </div>
@@ -378,7 +378,9 @@ export default function Home() {
       {/* ritual story */}
       <section id="ritual" className="reveal" style={{ background: "#ECE0C9" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "90px 48px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 70, alignItems: "center" }}>
-          <ImageSlot placeholder="A calm ritual / hands photo" radius={6} style={{ width: "100%", height: 460 }} />
+          <div className="cat-tile" style={{ position: "relative", width: "100%", height: 460, borderRadius: 6, overflow: "hidden" }}>
+            <Image src="/product_image/hands-ritual.webp" alt="The Lumière ritual" fill className="cat-img" sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover" }} />
+          </div>
           <div>
             <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 20 }}>The Lumière ritual</p>
             <h2 style={{ fontFamily: SERIF, fontSize: 46, lineHeight: 1.1, fontWeight: 500, color: "#2F2820", marginBottom: 24 }}>Small rituals,<br />quietly transformative.</h2>
