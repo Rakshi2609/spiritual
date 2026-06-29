@@ -11,8 +11,8 @@ import shapeData from "./om_shape.json";
    extruded here into solid oxidized metal, hung on a procedural box chain.
 ---------------------------------------------------------------------------- */
 
-const METAL = "#4A4A52"; // oxidised silver — matches the product photo
-const CHAIN = "#5C5C66"; // slightly brighter oxidised silver box chain
+const METAL = "#74747D"; // neutral oxidised silver-grey
+const CHAIN = "#84848E"; // slightly brighter grey box chain
 
 type ShapeEntry = { outer: number[][]; holes: number[][][] };
 
