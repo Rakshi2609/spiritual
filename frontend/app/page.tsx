@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 /* ----------------------------------------------------------------------------
@@ -157,6 +158,7 @@ export default function Home() {
           <a className="nav-link" href="#shop" style={{ color: "#5A4F40", textDecoration: "none" }}>Shop</a>
           <a className="nav-link" href="#crystals" style={{ color: "#5A4F40", textDecoration: "none" }}>Crystals</a>
           <a className="nav-link" href="#ritual" style={{ color: "#5A4F40", textDecoration: "none" }}>Ritual</a>
+          <Link className="nav-link" href="/product" style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}>3D View ◈</Link>
         </div>
         <a href="#" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</a>
         <div style={{ display: "flex", gap: 26, alignItems: "center" }}>
