@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Fraunces, Jost } from "next/font/google";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+// Premium editorial serif for headings/display
+const display = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  variable: "--font-display",
   display: "swap",
 });
 
-const jost = Jost({
+// Refined geometric sans for body
+const body = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
-  variable: "--font-jost",
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -29,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );

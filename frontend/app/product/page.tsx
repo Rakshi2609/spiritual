@@ -7,8 +7,8 @@ import Link from "next/link";
 const PHOTO = "/product_image/necklace.jpeg";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-const SERIF = "var(--font-cormorant), Georgia, serif";
-const SANS = "var(--font-jost), -apple-system, sans-serif";
+const SERIF = "var(--font-display), Georgia, serif";
+const SANS = "var(--font-body), -apple-system, sans-serif";
 
 // The 3D canvas is browser-only — load it client-side with a graceful fallback.
 const Viewer = dynamic(() => import("./Viewer"), {

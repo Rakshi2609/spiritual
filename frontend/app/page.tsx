@@ -6,11 +6,11 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 /* ----------------------------------------------------------------------------
    Lumière landing page — ported from the bundled design artifact.
-   Fonts come from next/font (CSS variables --font-cormorant / --font-jost).
+   Fonts come from next/font (CSS variables --font-display / --font-body).
 ---------------------------------------------------------------------------- */
 
-const SERIF = "var(--font-cormorant), Georgia, serif";
-const SANS = "var(--font-jost), -apple-system, sans-serif";
+const SERIF = "var(--font-display), Georgia, serif";
+const SANS = "var(--font-body), -apple-system, sans-serif";
 
 type Product = {
   id: string;
