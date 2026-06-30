@@ -72,22 +72,23 @@ export default function ProductPage() {
       }}
     >
       {/* nav */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
+      <nav className="pdp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
         <Link href="/" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}>← Back to shop</Link>
-        <Link href="/" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</Link>
+        <Link href="/" className="lp-logo" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</Link>
         <div style={{ width: 110 }} />
       </nav>
 
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "10px 48px 90px" }}>
+      <div className="pdp-wrap" style={{ maxWidth: 1280, margin: "0 auto", padding: "10px 48px 90px" }}>
         {/* breadcrumb */}
         <p style={{ fontSize: 12.5, letterSpacing: "1px", color: "#8A7E6C", marginBottom: 28, fontWeight: 300 }}>
           Shop · Crystals · <span style={{ color: "#3D352A" }}>{PRODUCT.name}</span>
         </p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
+        <div className="pdp-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
           {/* ---- gallery / 3D stage ---- */}
           <div>
             <div
+              className="pdp-stage"
               style={{
                 position: "relative",
                 height: 540,
@@ -182,7 +183,7 @@ export default function ProductPage() {
           {/* ---- product details ---- */}
           <div style={{ paddingTop: 10 }}>
             <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 16 }}>{PRODUCT.tagline}</p>
-            <h1 style={{ fontFamily: SERIF, fontSize: 52, lineHeight: 1.05, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.5px", marginBottom: 18 }}>{PRODUCT.name}</h1>
+            <h1 className="pdp-title" style={{ fontFamily: SERIF, fontSize: 52, lineHeight: 1.05, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.5px", marginBottom: 18 }}>{PRODUCT.name}</h1>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
               <span style={{ color: "#E4C188", letterSpacing: "2px", fontSize: 15 }}>★★★★★</span>
@@ -198,7 +199,7 @@ export default function ProductPage() {
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "#6A5F4F", fontWeight: 300, marginBottom: 30, maxWidth: 460 }}>{PRODUCT.desc}</p>
 
             {/* quantity + add to cart */}
-            <div style={{ display: "flex", gap: 14, alignItems: "stretch", marginBottom: 28 }}>
+            <div className="pdp-actions" style={{ display: "flex", gap: 14, alignItems: "stretch", marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", border: "1px solid #D8CBB2", borderRadius: 2, overflow: "hidden" }}>
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#6A5F4F", padding: "0 16px", height: "100%" }}>−</button>
                 <span style={{ minWidth: 34, textAlign: "center", fontSize: 15, color: "#2F2820" }}>{qty}</span>

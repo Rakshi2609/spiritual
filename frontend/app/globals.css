@@ -186,3 +186,247 @@ section[id],
 .product-card:hover img {
   transform: scale(1.06);
 }
+
+/* ============================================================
+   Responsive layer
+   The page bodies are inline-styled, so these media-query rules
+   carry !important to win over the element style attribute.
+   Breakpoints: 960px (tablet) and 600px (phone).
+   ============================================================ */
+
+@media (max-width: 960px) {
+  /* nav */
+  .lp-nav {
+    padding: 14px 24px !important;
+  }
+  .lp-nav-links {
+    gap: 20px !important;
+    font-size: 13px !important;
+  }
+
+  /* hero */
+  .hero {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    padding: 26px 24px 56px !important;
+  }
+  .hero-title {
+    font-size: 54px !important;
+  }
+  .hero-media {
+    height: 440px !important;
+  }
+
+  /* trust strip */
+  .trust-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px 16px !important;
+    padding: 24px !important;
+  }
+
+  /* products */
+  .shop-wrap {
+    padding: 64px 24px 32px !important;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* categories */
+  .cat-wrap {
+    padding: 48px 24px 64px !important;
+  }
+  .cat-grid {
+    grid-template-columns: 1fr 1fr !important;
+    height: auto !important;
+  }
+  .cat-grid > .cat-tile:first-child {
+    grid-column: 1 / -1 !important;
+    height: 280px !important;
+  }
+  .cat-grid > .cat-tile {
+    height: 220px !important;
+  }
+
+  /* ritual */
+  .ritual-grid {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+    padding: 60px 24px !important;
+  }
+  .ritual-media {
+    height: 320px !important;
+  }
+
+  /* testimonial + newsletter */
+  .tm-wrap {
+    padding: 80px 24px !important;
+  }
+  .tm-quote {
+    font-size: 28px !important;
+  }
+  .news-wrap {
+    padding: 64px 24px !important;
+  }
+
+  .h-section {
+    font-size: 38px !important;
+  }
+
+  /* footer */
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 32px !important;
+    padding: 48px 24px 32px !important;
+  }
+
+  /* product detail page */
+  .pdp-nav {
+    padding: 18px 24px !important;
+  }
+  .pdp-wrap {
+    padding: 8px 24px 64px !important;
+  }
+  .pdp-grid {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+  }
+  .pdp-stage {
+    height: 420px !important;
+  }
+  .pdp-title {
+    font-size: 40px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .lp-nav {
+    padding: 12px 18px !important;
+  }
+  .lp-nav-links {
+    display: none !important;
+  }
+  .lp-logo {
+    font-size: 22px !important;
+    letter-spacing: 2px !important;
+  }
+  .lp-nav-actions {
+    gap: 16px !important;
+  }
+
+  .hero {
+    padding: 22px 18px 44px !important;
+  }
+  .hero-title {
+    font-size: 40px !important;
+  }
+  .hero-stats {
+    gap: 18px !important;
+  }
+  .hero-media {
+    height: 340px !important;
+    margin-top: 18px !important;
+  }
+
+  .trust-grid {
+    padding: 22px 18px !important;
+  }
+
+  .shop-wrap {
+    padding: 48px 18px 24px !important;
+  }
+  .product-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cat-wrap {
+    padding: 36px 18px 48px !important;
+  }
+  .cat-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cat-grid > .cat-tile:first-child {
+    grid-column: auto !important;
+  }
+
+  .ritual-grid {
+    padding: 48px 18px !important;
+  }
+  .tm-wrap {
+    padding: 64px 22px !important;
+  }
+  .tm-quote {
+    font-size: 24px !important;
+  }
+  .news-wrap {
+    padding: 52px 20px !important;
+  }
+  .news-form {
+    flex-direction: column !important;
+  }
+  .news-form button {
+    padding: 15px 28px !important;
+  }
+
+  .h-section {
+    font-size: 31px !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    padding: 40px 18px 28px !important;
+  }
+
+  .pdp-grid {
+    gap: 28px !important;
+  }
+  .pdp-stage {
+    height: 320px !important;
+  }
+  .pdp-title {
+    font-size: 32px !important;
+  }
+  .pdp-actions {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* checkout: two columns on desktop, stacked on tablet/phone */
+.co-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .co-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  /* show the order summary first when stacked */
+  .co-summary {
+    order: -1;
+  }
+}
+.co-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 480px) {
+  .co-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ---- auth + checkout shared (built responsive; no overrides needed) ---- */
+.auth-input:focus,
+.field-input:focus {
+  border-color: #b5894f !important;
+  box-shadow: 0 0 0 3px rgba(181, 137, 79, 0.14);
+}
+.auth-submit:hover,
+.pay-btn:hover {
+  background: #9c7a4e !important;
+}
