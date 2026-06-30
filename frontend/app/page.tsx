@@ -160,7 +160,6 @@ export default function Home() {
         background:
           "radial-gradient(1200px 700px at 78% 8%, #F8F1E2 0%, #F2E9D8 45%, #EDE3CE 100%)",
         minHeight: "100vh",
-        overflowX: "hidden",
       }}
     >
       {/* scroll progress bar */}
@@ -306,7 +305,7 @@ export default function Home() {
               style={{ objectFit: "cover" }}
             />
           </Link>
-          <Link href="/product" style={{ textDecoration: "none", position: "absolute", zIndex: 2, bottom: 26, left: -28, background: "#F6EFE2", padding: "16px 22px", borderRadius: 4, boxShadow: "0 12px 40px rgba(61,53,42,0.14)" }}>
+          <Link href="/product" className="hero-label" style={{ textDecoration: "none", position: "absolute", zIndex: 2, bottom: 26, left: -28, background: "#F6EFE2", padding: "16px 22px", borderRadius: 4, boxShadow: "0 12px 40px rgba(61,53,42,0.14)" }}>
             <div style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#B5894F" }}>Best seller · 3D view ◈</div>
             <div style={{ fontFamily: SERIF, fontSize: 21, color: "#2F2820", marginTop: 3 }}>Om Pendant Chain</div>
           </Link>

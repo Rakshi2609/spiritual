@@ -6,11 +6,17 @@
 
 html {
   scroll-behavior: smooth;
+  /* clip (not hidden) prevents sideways scroll WITHOUT creating a scroll
+     container, so position: sticky on the nav keeps working. `hidden` here
+     (or on any ancestor) silently disables sticky. */
+  overflow-x: clip;
 }
 
 html,
 body {
   background: #f2e9d8;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* anchored sections clear the sticky nav */
@@ -327,6 +333,13 @@ section[id],
   .hero-media {
     height: 340px !important;
     margin-top: 18px !important;
+  }
+  /* bring the "Om Pendant Chain" label down to the bottom-left corner
+     (instead of hanging off-screen on the left) */
+  .hero-label {
+    left: 16px !important;
+    bottom: 16px !important;
+    padding: 13px 18px !important;
   }
 
   .trust-grid {
