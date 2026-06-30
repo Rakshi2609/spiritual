@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useCart, useUser } from "../_components/store";
 
 /* ----------------------------------------------------------------------------
-   Dummy checkout — responsive two-column layout (form + order summary).
-   The order is a static sample; "Place order" fakes a short delay and then
-   shows a confirmation. No real payment is processed.
+   Checkout — reads the real shared cart, lets you change quantities / remove
+   items, and autofills contact details from the logged-in account.
+   "Place order" is a demo: it clears the cart and shows a confirmation.
 ---------------------------------------------------------------------------- */
 
 const SERIF = "var(--font-display), Georgia, serif";
@@ -15,15 +17,40 @@ const SANS = "var(--font-body), -apple-system, sans-serif";
 
 const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 
-type Line = { id: string; name: string; qty: number; price: number; img: string };
+const FREE_SHIPPING_THRESHOLD = 2499;
 
-const ORDER: Line[] = [
-  { id: "om", name: "Om Pendant Chain", qty: 1, price: 2999, img: "/product_image/necklace.jpeg" },
-  { id: "amethyst", name: "Amethyst Cluster", qty: 1, price: 3999, img: "/product_image/amethyst-cluster.jpg" },
-  { id: "candle", name: "Moonlight Candle", qty: 2, price: 2499, img: "/product_image/moonlight-candle.webp" },
+const PAY_METHODS: { key: "upi" | "card" | "cod"; label: string; icon: React.ReactNode }[] = [
+  {
+    key: "upi",
+    label: "UPI",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <line x1="11" y1="18" x2="13" y2="18" />
+      </svg>
+    ),
+  },
+  {
+    key: "card",
+    label: "Card",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <line x1="2" y1="10" x2="22" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    key: "cod",
+    label: "Cash",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <circle cx="12" cy="12" r="2.5" />
+      </svg>
+    ),
+  },
 ];
-
-const SHIPPING = 0; // free over ₹2,499
 
 const labelStyle: React.CSSProperties = {
   fontSize: 12,
@@ -55,6 +82,7 @@ function Field({
   placeholder,
   autoComplete,
   required = true,
+  defaultValue,
 }: {
   label: string;
   id: string;
@@ -62,6 +90,7 @@ function Field({
   placeholder?: string;
   autoComplete?: string;
   required?: boolean;
+  defaultValue?: string;
 }) {
   return (
     <div>
@@ -75,6 +104,7 @@ function Field({
         required={required}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        defaultValue={defaultValue}
         style={inputStyle}
       />
     </div>
@@ -101,25 +131,32 @@ function SectionTitle({ step, children }: { step: number; children: React.ReactN
       >
         {step}
       </span>
-      <h2 style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 500, color: "#2F2820" }}>
-        {children}
-      </h2>
+      <h2 style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 500, color: "#2F2820" }}>{children}</h2>
     </div>
   );
 }
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { items, subtotal, inc, dec, remove, clear } = useCart();
+  const { user } = useUser();
+
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [payMethod, setPayMethod] = useState<"upi" | "card" | "cod">("upi");
 
-  const subtotal = ORDER.reduce((s, l) => s + l.price * l.qty, 0);
-  const total = subtotal + SHIPPING;
+  const shipping = subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD ? 99 : 0;
+  const total = subtotal + shipping;
+
+  const firstName = user?.name ? user.name.split(" ")[0] : "";
+  const lastName = user?.name ? user.name.split(" ").slice(1).join(" ") : "";
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (items.length === 0) return;
     setBusy(true);
     setTimeout(() => {
+      clear();
       setBusy(false);
       setDone(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -132,12 +169,11 @@ export default function CheckoutPage() {
         fontFamily: SANS,
         color: "#3D352A",
         minHeight: "100vh",
-        background:
-          "radial-gradient(1200px 700px at 78% 8%, #F8F1E2 0%, #F2E9D8 45%, #EDE3CE 100%)",
+        background: "radial-gradient(1200px 700px at 78% 8%, #F8F1E2 0%, #F2E9D8 45%, #EDE3CE 100%)",
       }}
     >
-      {/* header */}
       <header
+        className="co-header"
         style={{
           padding: "20px 24px",
           maxWidth: 1180,
@@ -145,60 +181,51 @@ export default function CheckoutPage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 12,
         }}
       >
-        <Link
-          href="/"
-          style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}
-        >
-          ← Continue shopping
+        <Link href="/" className="co-back" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px", whiteSpace: "nowrap" }}>
+          <span className="co-back-long">← Continue shopping</span>
+          <span className="co-back-short">← Shop</span>
         </Link>
         <Link
           href="/"
-          style={{
-            fontFamily: SERIF,
-            fontSize: 24,
-            fontWeight: 600,
-            letterSpacing: "3px",
-            color: "#3D352A",
-            textDecoration: "none",
-            textTransform: "uppercase",
-          }}
+          style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}
         >
           Lumière
         </Link>
-        <Link href="/login" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>
-          Sign in
-        </Link>
+        {user ? (
+          <span style={{ fontSize: 14, color: "#3D352A" }}>Hi, {firstName}</span>
+        ) : (
+          <Link href="/login" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>
+            Sign in
+          </Link>
+        )}
       </header>
 
-      <main style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px 80px" }}>
+      <main className="co-main" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px 80px" }}>
         {done ? (
           <ConfirmationView total={total} onHome={() => router.push("/")} />
+        ) : items.length === 0 ? (
+          <EmptyCart />
         ) : (
           <>
             <h1
-              style={{
-                fontFamily: SERIF,
-                fontSize: "clamp(32px, 7vw, 46px)",
-                fontWeight: 500,
-                color: "#2F2820",
-                marginBottom: 8,
-              }}
+              style={{ fontFamily: SERIF, fontSize: "clamp(32px, 7vw, 46px)", fontWeight: 500, color: "#2F2820", marginBottom: 8 }}
             >
               Checkout
             </h1>
             <p style={{ fontSize: 14.5, color: "#8A7E6C", fontWeight: 300, marginBottom: 36 }}>
-              Almost there — review your ritual and complete your order.
+              {user ? "We've prefilled your details — review and complete your order." : "Review your ritual and complete your order."}
             </p>
 
             <div className="co-grid">
               {/* ---- left: forms ---- */}
-              <form onSubmit={onSubmit}>
+              <form onSubmit={onSubmit} key={user?.id || "guest"}>
                 <section style={cardStyle}>
                   <SectionTitle step={1}>Contact</SectionTitle>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <Field label="Email" id="email" type="email" placeholder="you@example.com" autoComplete="email" />
+                    <Field label="Email" id="email" type="email" placeholder="you@example.com" autoComplete="email" defaultValue={user?.email} />
                     <Field label="Phone" id="phone" type="tel" placeholder="+91 98765 43210" autoComplete="tel" />
                   </div>
                 </section>
@@ -207,8 +234,8 @@ export default function CheckoutPage() {
                   <SectionTitle step={2}>Shipping address</SectionTitle>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     <div className="co-row">
-                      <Field label="First name" id="fname" placeholder="Mara" autoComplete="given-name" />
-                      <Field label="Last name" id="lname" placeholder="Kapoor" autoComplete="family-name" />
+                      <Field label="First name" id="fname" placeholder="Mara" autoComplete="given-name" defaultValue={firstName} />
+                      <Field label="Last name" id="lname" placeholder="Kapoor" autoComplete="family-name" defaultValue={lastName} />
                     </div>
                     <Field label="Address" id="addr" placeholder="123 Moonstone Lane" autoComplete="street-address" />
                     <div className="co-row">
@@ -220,16 +247,92 @@ export default function CheckoutPage() {
 
                 <section style={cardStyle}>
                   <SectionTitle step={3}>Payment</SectionTitle>
-                  <p style={{ fontSize: 13, color: "#9C5A3C", marginBottom: 16, fontWeight: 300 }}>
-                    ✦ Demo only — please don&apos;t enter a real card.
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <Field label="Card number" id="card" placeholder="4242 4242 4242 4242" autoComplete="cc-number" />
-                    <div className="co-row">
-                      <Field label="Expiry" id="exp" placeholder="MM / YY" autoComplete="cc-exp" />
-                      <Field label="CVC" id="cvc" placeholder="123" autoComplete="cc-csc" />
-                    </div>
+
+                  {/* method selector */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 20 }}>
+                    {PAY_METHODS.map((m) => {
+                      const active = payMethod === m.key;
+                      return (
+                        <button
+                          type="button"
+                          key={m.key}
+                          onClick={() => setPayMethod(m.key)}
+                          aria-pressed={active}
+                          style={{
+                            border: active ? "2px solid #B5894F" : "1px solid #E0D2B6",
+                            background: active ? "#F1E7D4" : "#FBF6EC",
+                            borderRadius: 6,
+                            padding: "14px 6px",
+                            cursor: "pointer",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 8,
+                            fontFamily: SANS,
+                            color: active ? "#3D352A" : "#6A5F4F",
+                            transition: "border-color 0.2s ease, background 0.2s ease",
+                          }}
+                        >
+                          {m.icon}
+                          <span style={{ fontSize: 12.5, letterSpacing: "0.3px", fontWeight: active ? 500 : 400 }}>{m.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {payMethod === "card" && (
+                    <>
+                      <p style={{ fontSize: 13, color: "#9C5A3C", marginBottom: 16, fontWeight: 300 }}>
+                        ✦ Demo only — please don&apos;t enter a real card.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        <Field label="Card number" id="card" placeholder="4242 4242 4242 4242" autoComplete="cc-number" />
+                        <div className="co-row">
+                          <Field label="Expiry" id="exp" placeholder="MM / YY" autoComplete="cc-exp" />
+                          <Field label="CVC" id="cvc" placeholder="123" autoComplete="cc-csc" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {payMethod === "upi" && (
+                    <>
+                      <p style={{ fontSize: 13, color: "#9C5A3C", marginBottom: 16, fontWeight: 300 }}>
+                        ✦ Demo only — you won&apos;t actually be charged.
+                      </p>
+                      <Field label="UPI ID" id="upi" placeholder="yourname@upi" autoComplete="off" />
+                      <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+                        {["Google Pay", "PhonePe", "Paytm", "BHIM"].map((app) => (
+                          <span
+                            key={app}
+                            style={{ fontSize: 12, color: "#6A5F4F", border: "1px solid #E0D2B6", borderRadius: 999, padding: "5px 12px", background: "#FBF6EC" }}
+                          >
+                            {app}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {payMethod === "cod" && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "flex-start",
+                        background: "#FBF6EC",
+                        border: "1px solid #E0D2B6",
+                        borderRadius: 6,
+                        padding: "16px 18px",
+                      }}
+                    >
+                      <span style={{ color: "#B5894F", flexShrink: 0, marginTop: 1 }}>✦</span>
+                      <p style={{ fontSize: 14, lineHeight: 1.6, color: "#6A5F4F", fontWeight: 300 }}>
+                        Pay in cash when your order arrives at your doorstep. Please keep the exact amount
+                        ready — our delivery partner may not carry change.
+                      </p>
+                    </div>
+                  )}
                 </section>
 
                 <button
@@ -255,8 +358,8 @@ export default function CheckoutPage() {
                 >
                   {busy ? "Placing order…" : `Place order · ${money(total)}`}
                 </button>
-                <p style={{ textAlign: "center", fontSize: 12.5, color: "#8A7E6C", marginTop: 14, fontWeight: 300 }}>
-                  🔒 Secure dummy checkout · no real charge
+                <p style={{ textAlign: "center", fontSize: 12.5, color: "#8A7E6C", marginTop: 14, fontWeight: 300, letterSpacing: "0.3px" }}>
+                  Secure dummy checkout · no real charge
                 </p>
               </form>
 
@@ -265,55 +368,35 @@ export default function CheckoutPage() {
                 <h2 style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 500, color: "#2F2820", marginBottom: 20 }}>
                   Order summary
                 </h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {ORDER.map((l) => (
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                  {items.map((l) => (
                     <div key={l.id} style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                      <div
-                        style={{
-                          position: "relative",
-                          width: 56,
-                          height: 56,
-                          borderRadius: 4,
-                          overflow: "hidden",
-                          background: "#E8DAC0",
-                          flexShrink: 0,
-                          backgroundImage: `url(${l.img})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }}
-                      />
+                      <div style={{ position: "relative", width: 56, height: 56, borderRadius: 4, overflow: "hidden", background: "#E8DAC0", flexShrink: 0 }}>
+                        {l.img && <Image src={l.img} alt={l.name} fill sizes="56px" style={{ objectFit: "cover" }} />}
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: SERIF, fontSize: 16, color: "#2F2820" }}>{l.name}</div>
-                        <div style={{ fontSize: 13, color: "#8A7E6C", marginTop: 2 }}>Qty {l.qty}</div>
+                        {/* qty stepper + remove */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 6 }}>
+                          <div style={{ display: "flex", alignItems: "center", border: "1px solid #D8CBB2", borderRadius: 3, overflow: "hidden" }}>
+                            <button type="button" onClick={() => dec(l.id)} aria-label="Decrease quantity" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, color: "#6A5F4F", padding: "1px 10px" }}>−</button>
+                            <span style={{ minWidth: 24, textAlign: "center", fontSize: 13.5, color: "#2F2820" }}>{l.qty}</span>
+                            <button type="button" onClick={() => inc(l.id)} aria-label="Increase quantity" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, color: "#6A5F4F", padding: "1px 10px" }}>+</button>
+                          </div>
+                          <button type="button" onClick={() => remove(l.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#B5894F", letterSpacing: "0.3px" }}>Remove</button>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 15, color: "#3D352A", fontWeight: 500 }}>
-                        {money(l.price * l.qty)}
-                      </div>
+                      <div style={{ fontSize: 15, color: "#3D352A", fontWeight: 500 }}>{money(l.price * l.qty)}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* promo */}
                 <div style={{ display: "flex", gap: 10, margin: "22px 0 20px" }}>
-                  <input
-                    className="field-input"
-                    placeholder="Promo code"
-                    style={{ ...inputStyle, padding: "11px 14px", fontSize: 14 }}
-                  />
+                  <input className="field-input" placeholder="Promo code" style={{ ...inputStyle, padding: "11px 14px", fontSize: 14 }} />
                   <button
                     type="button"
-                    style={{
-                      border: "1px solid #D8CBB2",
-                      background: "none",
-                      borderRadius: 3,
-                      padding: "0 18px",
-                      cursor: "pointer",
-                      fontFamily: SANS,
-                      fontSize: 13,
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      color: "#6A5F4F",
-                    }}
+                    style={{ border: "1px solid #D8CBB2", background: "none", borderRadius: 3, padding: "0 18px", cursor: "pointer", fontFamily: SANS, fontSize: 13, letterSpacing: "1px", textTransform: "uppercase", color: "#6A5F4F" }}
                   >
                     Apply
                   </button>
@@ -321,7 +404,7 @@ export default function CheckoutPage() {
 
                 <div style={{ borderTop: "1px solid #E3D6BD", paddingTop: 18, display: "flex", flexDirection: "column", gap: 12 }}>
                   <Row label="Subtotal" value={money(subtotal)} />
-                  <Row label="Shipping" value={SHIPPING === 0 ? "Free" : money(SHIPPING)} accent={SHIPPING === 0} />
+                  <Row label="Shipping" value={shipping === 0 ? "Free" : money(shipping)} accent={shipping === 0} />
                   <div style={{ borderTop: "1px solid #E3D6BD", paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                     <span style={{ fontSize: 16, fontWeight: 500, color: "#2F2820" }}>Total</span>
                     <span style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 600, color: "#2F2820" }}>{money(total)}</span>
@@ -350,6 +433,38 @@ function Row({ label, value, accent = false }: { label: string; value: string; a
     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14.5 }}>
       <span style={{ color: "#6A5F4F", fontWeight: 300 }}>{label}</span>
       <span style={{ color: accent ? "#6F8A6A" : "#3D352A", fontWeight: 500 }}>{value}</span>
+    </div>
+  );
+}
+
+function EmptyCart() {
+  return (
+    <div style={{ maxWidth: 480, margin: "40px auto 0", textAlign: "center", padding: "40px 24px" }}>
+      <div
+        style={{
+          width: 64, height: 64, borderRadius: 999, margin: "0 auto 20px",
+          background: "#EDE2CC", border: "1px solid #E0D2B6",
+          display: "flex", alignItems: "center", justifyContent: "center", color: "#B5894F",
+        }}
+      >
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+      </div>
+      <h1 style={{ fontFamily: SERIF, fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 500, color: "#2F2820", marginBottom: 14 }}>
+        Your cart is empty
+      </h1>
+      <p style={{ fontSize: 15, lineHeight: 1.7, color: "#6A5F4F", fontWeight: 300, marginBottom: 28 }}>
+        Add a crystal, candle or ritual tool and it&apos;ll appear here.
+      </p>
+      <Link
+        href="/"
+        style={{ display: "inline-block", background: "#3D352A", color: "#F6EFE2", textDecoration: "none", fontSize: 13.5, letterSpacing: "2px", textTransform: "uppercase", padding: "16px 38px", borderRadius: 3 }}
+      >
+        Browse the shop
+      </Link>
     </div>
   );
 }
@@ -392,8 +507,8 @@ function ConfirmationView({ total, onHome }: { total: number; onHome: () => void
         Thank you for your order
       </h1>
       <p style={{ fontSize: 15.5, lineHeight: 1.7, color: "#6A5F4F", fontWeight: 300, marginBottom: 28 }}>
-        We&apos;ve charged {money(total)} (not really — this is a demo). A confirmation will drift
-        into your inbox shortly. May your rituals be radiant. ✦
+        We&apos;ve charged {money(total)} (not really — this is a demo). A confirmation will drift into
+        your inbox shortly. May your rituals be radiant. ✦
       </p>
       <button
         onClick={onHome}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useUser } from "./store";
 
 /* ----------------------------------------------------------------------------
    Shared auth card for /login and /signup.
@@ -135,6 +136,7 @@ function PasswordField({
 
 export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
+  const { refresh } = useUser();
   const isSignup = mode === "signup";
 
   const [method, setMethod] = useState<"email" | "phone">("email");
@@ -182,6 +184,7 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
         setBusy(false);
         return;
       }
+      await refresh(); // update nav/user context before leaving
       router.push("/");
       router.refresh();
     } catch {

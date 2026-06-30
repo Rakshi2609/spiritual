@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCart, useUser } from "./_components/store";
 
 /* ----------------------------------------------------------------------------
    Lumière landing page — ported from the bundled design artifact.
@@ -81,8 +82,10 @@ function ImageSlot({
 }
 
 export default function Home() {
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const { items, count, subtotal, add, inc, dec, remove } = useCart();
+  const { user, logout } = useUser();
   const [cartOpen, setCartOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -143,33 +146,11 @@ export default function Home() {
   };
 
   const addToCart = (id: string) => {
-    setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
     const item = CATALOG.find((c) => c.id === id);
-    if (item) showToast("Added " + item.name + " to cart");
+    if (!item) return;
+    add({ id: item.id, name: item.name, price: item.price, img: item.img });
+    showToast("Added " + item.name + " to cart");
   };
-
-  const removeLine = (id: string) => {
-    setCart((c) => {
-      const next = { ...c };
-      delete next[id];
-      return next;
-    });
-  };
-
-  const count = Object.values(cart).reduce((a, b) => a + b, 0);
-  const cartLines = Object.entries(cart).map(([id, qty]) => {
-    const item = CATALOG.find((c) => c.id === id)!;
-    return {
-      id,
-      name: item.name,
-      qtyLabel: "Qty " + qty,
-      priceLabel: money(item.price * qty),
-    };
-  });
-  const subtotal = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const item = CATALOG.find((c) => c.id === id)!;
-    return sum + item.price * qty;
-  }, 0);
 
   return (
     <div
@@ -207,6 +188,25 @@ export default function Home() {
       {/* nav */}
       <div ref={navRef} className="site-nav">
         <nav className="lp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 48px", maxWidth: 1280, margin: "0 auto" }}>
+          <button
+            className="lp-hamburger"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
           <div className="lp-nav-links" style={{ display: "flex", gap: 38, alignItems: "center", fontSize: 14, letterSpacing: "0.6px", fontWeight: 400 }}>
             <a className="nav-link" href="#shop" style={{ color: "#5A4F40", textDecoration: "none" }}>Shop</a>
             <a className="nav-link" href="#crystals" style={{ color: "#5A4F40", textDecoration: "none" }}>Crystals</a>
@@ -215,14 +215,51 @@ export default function Home() {
           </div>
           <a className="lp-logo" href="#" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</a>
           <div className="lp-nav-actions" style={{ display: "flex", gap: 26, alignItems: "center" }}>
-            <span style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Search</span>
-            <Link href="/login" className="nav-link" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>Account</Link>
+            <span className="lp-hide-mobile" style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Search</span>
+            {user ? (
+              <span className="lp-hide-mobile" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 14, color: "#3D352A" }}>Hi, {user.name.split(" ")[0]}</span>
+                <button
+                  onClick={async () => { await logout(); showToast("Signed out"); }}
+                  className="nav-link"
+                  style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#B5894F" }}
+                >
+                  Log out
+                </button>
+              </span>
+            ) : (
+              <Link href="/login" className="nav-link lp-hide-mobile" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>Sign in</Link>
+            )}
             <button onClick={() => setCartOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#3D352A", display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
               Cart
               <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
             </button>
           </div>
         </nav>
+
+        {/* mobile dropdown menu (shown via CSS only on small screens) */}
+        <div className={`lp-mobile-menu${menuOpen ? " open" : ""}`}>
+          <a href="#shop" onClick={() => setMenuOpen(false)}>Shop</a>
+          <a href="#crystals" onClick={() => setMenuOpen(false)}>Crystals</a>
+          <a href="#ritual" onClick={() => setMenuOpen(false)}>Ritual</a>
+          <Link href="/product" onClick={() => setMenuOpen(false)} style={{ color: "#B5894F" }}>3D View ◈</Link>
+          <span style={{ padding: "15px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #ece0c9" }}>
+            <span style={{ fontSize: 15, color: "#5A4F40", cursor: "pointer" }}>Search</span>
+          </span>
+          {user ? (
+            <span style={{ padding: "15px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 15, color: "#3D352A" }}>Hi, {user.name.split(" ")[0]}</span>
+              <button
+                onClick={async () => { setMenuOpen(false); await logout(); showToast("Signed out"); }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 15, color: "#B5894F" }}
+              >
+                Log out
+              </button>
+            </span>
+          ) : (
+            <Link href="/login" onClick={() => setMenuOpen(false)} style={{ color: "#3D352A" }}>Sign in</Link>
+          )}
+        </div>
       </div>
 
       {/* hero */}
@@ -283,7 +320,7 @@ export default function Home() {
             ["Ethically Sourced", "Traceable to the mine"],
             ["Free Shipping ₹2,499+", "Carbon-neutral delivery"],
             ["Cleansed & Charged", "Under the full moon"],
-            ["30-Day Returns", "No questions asked"],
+            ["7-Day Returns", "No questions asked"],
           ].map(([title, sub]) => (
             <div key={title} style={{ textAlign: "center" }}>
               <div style={{ fontSize: "14.5px", fontWeight: 500, color: "#3D352A", letterSpacing: "0.4px" }}>{title}</div>
@@ -458,14 +495,24 @@ export default function Home() {
           {count === 0 ? (
             <div style={{ padding: "60px 0", textAlign: "center", color: "#8A7E6C", fontWeight: 300, fontSize: "14.5px" }}>Your cart is quietly empty.</div>
           ) : (
-            cartLines.map((line) => (
+            items.map((line) => (
               <div key={line.id} style={{ display: "flex", gap: 14, padding: "18px 0", borderBottom: "1px solid #EADFC9", alignItems: "center" }}>
-                <div style={{ width: 60, height: 60, background: "#E8DAC0", borderRadius: 3, flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2F2820" }}>{line.name}</div>
-                  <div style={{ fontSize: 13, color: "#8A7E6C", marginTop: 2 }}>{line.qtyLabel} · {line.priceLabel}</div>
+                <div style={{ position: "relative", width: 60, height: 60, background: "#E8DAC0", borderRadius: 3, flexShrink: 0, overflow: "hidden" }}>
+                  {line.img && <Image src={line.img} alt={line.name} fill sizes="60px" style={{ objectFit: "cover" }} />}
                 </div>
-                <button onClick={() => removeLine(line.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#B5894F", letterSpacing: "0.5px" }}>Remove</button>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2F2820" }}>{line.name}</div>
+                  <div style={{ fontSize: 13, color: "#8A7E6C", marginTop: 2 }}>{money(line.price)} each</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 0, marginTop: 8, border: "1px solid #D8CBB2", borderRadius: 3, width: "fit-content", overflow: "hidden" }}>
+                    <button onClick={() => dec(line.id)} aria-label="Decrease quantity" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#6A5F4F", padding: "2px 12px" }}>−</button>
+                    <span style={{ minWidth: 26, textAlign: "center", fontSize: 14, color: "#2F2820" }}>{line.qty}</span>
+                    <button onClick={() => inc(line.id)} aria-label="Increase quantity" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#6A5F4F", padding: "2px 12px" }}>+</button>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
+                  <div style={{ fontSize: 15, color: "#3D352A", fontWeight: 500 }}>{money(line.price * line.qty)}</div>
+                  <button onClick={() => remove(line.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#B5894F", letterSpacing: "0.5px" }}>Remove</button>
+                </div>
               </div>
             ))
           )}

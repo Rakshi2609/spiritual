@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Jost } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./_components/store";
 
 // Premium editorial serif for headings/display
 const display = Fraunces({
@@ -32,7 +33,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

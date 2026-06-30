@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const PHOTO = "/product_image/necklace.jpeg";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCart } from "../_components/store";
 
 const SERIF = "var(--font-display), Georgia, serif";
 const SANS = "var(--font-body), -apple-system, sans-serif";
@@ -44,7 +45,10 @@ const VIEWS = [
   { key: "3d", label: "3D view" },
 ];
 
+const PRODUCT_ID = "om";
+
 export default function ProductPage() {
+  const { add, count } = useCart();
   const [view, setView] = useState("3d"); // the requested "3rd view" is active by default
   const [qty, setQty] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -75,7 +79,10 @@ export default function ProductPage() {
       <nav className="pdp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
         <Link href="/" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}>← Back to shop</Link>
         <Link href="/" className="lp-logo" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</Link>
-        <div style={{ width: 110 }} />
+        <Link href="/checkout" style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, color: "#3D352A", textDecoration: "none", minWidth: 110, justifyContent: "flex-end" }}>
+          Cart
+          <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
+        </Link>
       </nav>
 
       <div className="pdp-wrap" style={{ maxWidth: 1280, margin: "0 auto", padding: "10px 48px 90px" }}>
@@ -206,7 +213,10 @@ export default function ProductPage() {
                 <button onClick={() => setQty((q) => q + 1)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#6A5F4F", padding: "0 16px", height: "100%" }}>+</button>
               </div>
               <button
-                onClick={() => showToast(`Added ${qty} × ${PRODUCT.name} to cart`)}
+                onClick={() => {
+                  add({ id: PRODUCT_ID, name: PRODUCT.name, price: PRODUCT.price, img: PHOTO }, qty);
+                  showToast(`Added ${qty} × ${PRODUCT.name} to cart`);
+                }}
                 style={{ flex: 1, background: "#3D352A", color: "#F6EFE2", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 13.5, letterSpacing: "2px", textTransform: "uppercase", padding: "16px 28px", borderRadius: 2, boxShadow: "0 10px 28px rgba(61,53,42,0.28)" }}
               >
                 Add to cart · {money(PRODUCT.price * qty)}

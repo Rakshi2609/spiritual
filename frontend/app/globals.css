@@ -404,9 +404,12 @@ section[id],
     grid-template-columns: 1fr !important;
     gap: 32px !important;
   }
-  /* show the order summary first when stacked */
+  /* show the order summary first when stacked, and drop the sticky pin
+     (otherwise it stays fixed while the form scrolls up over it) */
   .co-summary {
     order: -1;
+    position: static !important;
+    top: auto !important;
   }
 }
 .co-row {
@@ -417,6 +420,67 @@ section[id],
 @media (max-width: 480px) {
   .co-row {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* checkout header: shorten the back link + tighten padding on phones */
+.co-back-short {
+  display: none;
+}
+@media (max-width: 600px) {
+  .co-header {
+    padding: 14px 18px !important;
+  }
+  .co-main {
+    padding: 12px 18px 64px !important;
+  }
+  .co-back-long {
+    display: none;
+  }
+  .co-back-short {
+    display: inline;
+  }
+}
+
+/* ---- mobile hamburger menu (landing nav) ---- */
+.lp-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #3d352a;
+  padding: 6px;
+  margin-left: -6px;
+}
+.lp-mobile-menu {
+  display: none;
+  flex-direction: column;
+  border-top: 1px solid #e3d6bd;
+  background: rgba(245, 237, 222, 0.96);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  backdrop-filter: saturate(140%) blur(12px);
+}
+.lp-mobile-menu a {
+  padding: 15px 20px;
+  font-size: 15px;
+  color: #3d352a;
+  text-decoration: none;
+  border-bottom: 1px solid #ece0c9;
+  letter-spacing: 0.4px;
+}
+.lp-mobile-menu a:active {
+  background: #ece0c9;
+}
+@media (max-width: 600px) {
+  .lp-hamburger {
+    display: inline-flex !important;
+    align-items: center;
+  }
+  .lp-mobile-menu.open {
+    display: flex !important;
+  }
+  .lp-hide-mobile {
+    display: none !important;
   }
 }
 
