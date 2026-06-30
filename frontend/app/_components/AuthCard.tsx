@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "./store";
 
 /* ----------------------------------------------------------------------------
@@ -139,6 +139,13 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
   const { refresh } = useUser();
   const isSignup = mode === "signup";
 
+  // where to go after auth — supports /login?next=/checkout (same-origin only)
+  const [nextUrl, setNextUrl] = useState("/");
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("next");
+    if (p && p.startsWith("/") && !p.startsWith("//")) setNextUrl(p);
+  }, []);
+
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -185,7 +192,7 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
         return;
       }
       await refresh(); // update nav/user context before leaving
-      router.push("/");
+      router.push(nextUrl);
       router.refresh();
     } catch {
       setError("Network error — please try again.");
@@ -207,7 +214,7 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
     if (otp.trim() !== "123456") return setError("Incorrect code. (Demo code: 123456)");
     setBusy(true);
     setTimeout(() => {
-      router.push("/");
+      router.push(nextUrl);
       router.refresh();
     }, 500);
   }
@@ -470,7 +477,10 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
 
           <p style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: "#6A5F4F" }}>
             {isSignup ? "Already have an account? " : "New to Lumière? "}
-            <Link href={isSignup ? "/login" : "/signup"} style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}>
+            <Link
+              href={(isSignup ? "/login" : "/signup") + (nextUrl !== "/" ? `?next=${encodeURIComponent(nextUrl)}` : "")}
+              style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}
+            >
               {isSignup ? "Sign in" : "Create one"}
             </Link>
           </p>

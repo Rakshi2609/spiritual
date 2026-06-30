@@ -139,7 +139,7 @@ function SectionTitle({ step, children }: { step: number; children: React.ReactN
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, inc, dec, remove, clear } = useCart();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
         {user ? (
           <span style={{ fontSize: 14, color: "#3D352A" }}>Hi, {firstName}</span>
         ) : (
-          <Link href="/login" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>
+          <Link href="/login?next=/checkout" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>
             Sign in
           </Link>
         )}
@@ -208,6 +208,10 @@ export default function CheckoutPage() {
           <ConfirmationView total={total} onHome={() => router.push("/")} />
         ) : items.length === 0 ? (
           <EmptyCart />
+        ) : loading ? (
+          <div style={{ textAlign: "center", padding: "80px 24px", color: "#8A7E6C", fontSize: 15 }}>Loading…</div>
+        ) : !user ? (
+          <SignInGate />
         ) : (
           <>
             <h1
@@ -433,6 +437,61 @@ function Row({ label, value, accent = false }: { label: string; value: string; a
     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14.5 }}>
       <span style={{ color: "#6A5F4F", fontWeight: 300 }}>{label}</span>
       <span style={{ color: accent ? "#6F8A6A" : "#3D352A", fontWeight: 500 }}>{value}</span>
+    </div>
+  );
+}
+
+function SignInGate() {
+  const NEXT = "?next=/checkout";
+  return (
+    <div
+      style={{
+        maxWidth: 460,
+        margin: "40px auto 0",
+        textAlign: "center",
+        background: "#F6EFE2",
+        border: "1px solid #EADFC9",
+        borderRadius: 10,
+        padding: "clamp(32px, 7vw, 48px)",
+        boxShadow: "0 30px 70px rgba(120,92,48,0.14)",
+      }}
+    >
+      <div
+        style={{
+          width: 60, height: 60, borderRadius: 999, margin: "0 auto 22px",
+          background: "#EDE2CC", border: "1px solid #E0D2B6",
+          display: "flex", alignItems: "center", justifyContent: "center", color: "#B5894F",
+        }}
+      >
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      </div>
+      <p style={{ fontSize: 13, letterSpacing: "3px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 12 }}>
+        One quick step
+      </p>
+      <h1 style={{ fontFamily: SERIF, fontSize: "clamp(26px, 6vw, 34px)", fontWeight: 500, lineHeight: 1.15, color: "#2F2820", marginBottom: 14 }}>
+        Please sign in to check out
+      </h1>
+      <p style={{ fontSize: 15, lineHeight: 1.7, color: "#6A5F4F", fontWeight: 300, marginBottom: 28 }}>
+        Sign in or create an account to complete your order. Your cart is saved — you&apos;ll come
+        right back here.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <Link
+          href={`/login${NEXT}`}
+          style={{ background: "#3D352A", color: "#F6EFE2", textDecoration: "none", fontSize: 13.5, letterSpacing: "2px", textTransform: "uppercase", padding: "16px", borderRadius: 3 }}
+        >
+          Sign in
+        </Link>
+        <Link
+          href={`/signup${NEXT}`}
+          style={{ background: "none", color: "#3D352A", textDecoration: "none", fontSize: 13.5, letterSpacing: "1px", textTransform: "uppercase", padding: "15px", borderRadius: 3, border: "1px solid #C8A87C" }}
+        >
+          Create an account
+        </Link>
+      </div>
     </div>
   );
 }

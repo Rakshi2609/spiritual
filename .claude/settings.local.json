@@ -54,7 +54,11 @@
       "Bash(curl -s -D - -o /dev/null -X POST http://localhost:3000/api/auth/logout)",
       "Bash(mongosh --quiet lumiere --eval 'db.users.find\\({}, {name:1, email:1, _id:0}\\).forEach\\(u => printjson\\(u\\)\\)')",
       "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/checkout)",
-      "Bash(echo \"checkout: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/checkout\\)\")"
+      "Bash(echo \"checkout: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/checkout\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)",
+      "Bash(echo \"home: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/login?next=/checkout')",
+      "Bash(echo \"login: $\\(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/login?next=/checkout'\\)\")"
     ]
   }
 }
