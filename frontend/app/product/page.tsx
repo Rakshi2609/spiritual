@@ -2,15 +2,14 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
 
 const PHOTO = "/product_image/necklace.jpeg";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { useCart } from "../_components/store";
+import { useUI } from "../_components/ui";
 import CrossSellCarousel from "../_components/CrossSellCarousel";
 import ProductReviews from "../_components/ProductReviews";
 import ProductFAQ, { type FaqItem } from "../_components/ProductFAQ";
-import CartDrawer from "../_components/CartDrawer";
 
 const SERIF = "var(--font-display), Georgia, serif";
 const SANS = "var(--font-body), -apple-system, sans-serif";
@@ -71,22 +70,10 @@ const VIEWS = [
 const PRODUCT_ID = "om";
 
 export default function ProductPage() {
-  const { add, count } = useCart();
+  const { add } = useCart();
+  const { showToast } = useUI();
   const [view, setView] = useState("3d"); // the requested "3rd view" is active by default
   const [qty, setQty] = useState(1);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-  }, []);
-
-  const showToast = (text: string) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(text);
-    toastTimer.current = setTimeout(() => setToast(null), 2200);
-  };
 
   const pct = Math.round((1 - PRODUCT.price / PRODUCT.mrp) * 100);
 
@@ -99,15 +86,6 @@ export default function ProductPage() {
         minHeight: "100vh",
       }}
     >
-      {/* nav */}
-      <nav className="pdp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
-        <Link href="/" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}>← Back to shop</Link>
-        <Link href="/" className="lp-logo" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</Link>
-        <button onClick={() => setCartOpen(true)} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, color: "#3D352A", background: "none", border: "none", cursor: "pointer", fontFamily: SANS, textDecoration: "none", minWidth: 110, justifyContent: "flex-end" }}>
-          Cart
-          <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
-        </button>
-      </nav>
 
       <div className="pdp-wrap" style={{ maxWidth: 1280, margin: "0 auto", padding: "10px 48px 90px" }}>
         {/* breadcrumb */}
@@ -281,15 +259,6 @@ export default function ProductPage() {
         </section>
       </div>
 
-      {/* cart drawer */}
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} onAdded={showToast} />
-
-      {/* toast */}
-      {toast && (
-        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 60, background: "#2F2820", color: "#F6EFE2", padding: "15px 26px", borderRadius: 3, fontSize: 14, letterSpacing: "0.5px", boxShadow: "0 14px 40px rgba(47,40,32,0.3)", animation: "toastIn 0.3s ease" }}>
-          {toast}
-        </div>
-      )}
     </div>
   );
 }

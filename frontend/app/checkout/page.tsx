@@ -172,38 +172,7 @@ export default function CheckoutPage() {
         background: "radial-gradient(1200px 700px at 78% 8%, #F8F1E2 0%, #F2E9D8 45%, #EDE3CE 100%)",
       }}
     >
-      <header
-        className="co-header"
-        style={{
-          padding: "20px 24px",
-          maxWidth: 1180,
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-        }}
-      >
-        <Link href="/" className="co-back" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px", whiteSpace: "nowrap" }}>
-          <span className="co-back-long">← Continue shopping</span>
-          <span className="co-back-short">← Shop</span>
-        </Link>
-        <Link
-          href="/"
-          style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}
-        >
-          Lumière
-        </Link>
-        {user ? (
-          <span style={{ fontSize: 14, color: "#3D352A" }}>Hi, {firstName}</span>
-        ) : (
-          <Link href="/login?next=/checkout" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>
-            Sign in
-          </Link>
-        )}
-      </header>
-
-      <main className="co-main" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px 80px" }}>
+      <main className="co-main" style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 24px 80px" }}>
         {done ? (
           <ConfirmationView total={total} onHome={() => router.push("/")} />
         ) : items.length === 0 ? (

@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useCart, useUser } from "./_components/store";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { useCart } from "./_components/store";
 import { CATALOG, HERO_IMG, money } from "./_components/catalog";
-import CartDrawer from "./_components/CartDrawer";
+import { useUI } from "./_components/ui";
 
 /* ----------------------------------------------------------------------------
    Lumière landing page — ported from the bundled design artifact.
@@ -59,22 +59,11 @@ function ImageSlot({
 }
 
 export default function Home() {
-  const { count, add } = useCart();
-  const { user, logout } = useUser();
-  const [cartOpen, setCartOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { add } = useCart();
+  const { showToast } = useUI();
   const progressRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimer.current) clearTimeout(toastTimer.current);
-    };
-  }, []);
-
-  // scroll progress bar + sticky-nav shadow (rAF-throttled, no re-renders)
+  // scroll progress bar (rAF-throttled, no re-renders)
   useEffect(() => {
     let ticking = false;
     const onScroll = () => {
@@ -85,7 +74,6 @@ export default function Home() {
         const max = doc.scrollHeight - doc.clientHeight;
         const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
         if (progressRef.current) progressRef.current.style.width = pct + "%";
-        if (navRef.current) navRef.current.classList.toggle("scrolled", doc.scrollTop > 12);
         ticking = false;
       });
     };
@@ -115,12 +103,6 @@ export default function Home() {
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
-
-  const showToast = (text: string) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(text);
-    toastTimer.current = setTimeout(() => setToast(null), 2200);
-  };
 
   const addToCart = (id: string) => {
     const item = CATALOG.find((c) => c.id === id);
@@ -158,83 +140,6 @@ export default function Home() {
               ))}
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* nav */}
-      <div ref={navRef} className="site-nav">
-        <nav className="lp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 48px", maxWidth: 1280, margin: "0 auto" }}>
-          <button
-            className="lp-hamburger"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            {menuOpen ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            )}
-          </button>
-          <div className="lp-nav-links" style={{ display: "flex", gap: 38, alignItems: "center", fontSize: 14, letterSpacing: "0.6px", fontWeight: 400 }}>
-            <a className="nav-link" href="#shop" style={{ color: "#5A4F40", textDecoration: "none" }}>Shop</a>
-            <a className="nav-link" href="#crystals" style={{ color: "#5A4F40", textDecoration: "none" }}>Crystals</a>
-            <a className="nav-link" href="#ritual" style={{ color: "#5A4F40", textDecoration: "none" }}>Ritual</a>
-            <Link className="nav-link" href="/product" style={{ color: "#B5894F", textDecoration: "none", fontWeight: 500 }}>3D View ◈</Link>
-          </div>
-          <a className="lp-logo" href="#" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</a>
-          <div className="lp-nav-actions" style={{ display: "flex", gap: 26, alignItems: "center" }}>
-            <span className="lp-hide-mobile" style={{ fontSize: 14, color: "#5A4F40", cursor: "pointer" }}>Search</span>
-            {user ? (
-              <span className="lp-hide-mobile" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 14, color: "#3D352A" }}>Hi, {user.name.split(" ")[0]}</span>
-                <button
-                  onClick={async () => { await logout(); showToast("Signed out"); }}
-                  className="nav-link"
-                  style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#B5894F" }}
-                >
-                  Log out
-                </button>
-              </span>
-            ) : (
-              <Link href="/login" className="nav-link lp-hide-mobile" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none" }}>Sign in</Link>
-            )}
-            <button onClick={() => setCartOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 14, color: "#3D352A", display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
-              Cart
-              <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
-            </button>
-          </div>
-        </nav>
-
-        {/* mobile dropdown menu (shown via CSS only on small screens) */}
-        <div className={`lp-mobile-menu${menuOpen ? " open" : ""}`}>
-          <a href="#shop" onClick={() => setMenuOpen(false)}>Shop</a>
-          <a href="#crystals" onClick={() => setMenuOpen(false)}>Crystals</a>
-          <a href="#ritual" onClick={() => setMenuOpen(false)}>Ritual</a>
-          <Link href="/product" onClick={() => setMenuOpen(false)} style={{ color: "#B5894F" }}>3D View ◈</Link>
-          <span style={{ padding: "15px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #ece0c9" }}>
-            <span style={{ fontSize: 15, color: "#5A4F40", cursor: "pointer" }}>Search</span>
-          </span>
-          {user ? (
-            <span style={{ padding: "15px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, color: "#3D352A" }}>Hi, {user.name.split(" ")[0]}</span>
-              <button
-                onClick={async () => { setMenuOpen(false); await logout(); showToast("Signed out"); }}
-                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: SANS, fontSize: 15, color: "#B5894F" }}
-              >
-                Log out
-              </button>
-            </span>
-          ) : (
-            <Link href="/login" onClick={() => setMenuOpen(false)} style={{ color: "#3D352A" }}>Sign in</Link>
-          )}
         </div>
       </div>
 
@@ -456,16 +361,6 @@ export default function Home() {
         </div>
         <div style={{ borderTop: "1px solid #4A4133", padding: "22px 48px", textAlign: "center", fontSize: 12, letterSpacing: "1px", color: "#8A7E6C" }}>© 2026 Lumière · Made with intention</div>
       </footer>
-
-      {/* cart drawer */}
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} onAdded={showToast} />
-
-      {/* toast */}
-      {toast && (
-        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 60, background: "#2F2820", color: "#F6EFE2", padding: "15px 26px", borderRadius: 3, fontSize: 14, letterSpacing: "0.5px", boxShadow: "0 14px 40px rgba(47,40,32,0.3)", animation: "toastIn 0.3s ease" }}>
-          {toast}
-        </div>
-      )}
     </div>
   );
 }

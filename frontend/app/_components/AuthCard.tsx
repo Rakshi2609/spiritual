@@ -251,29 +251,6 @@ export default function AuthCard({ mode }: { mode: "login" | "signup" }) {
         flexDirection: "column",
       }}
     >
-      <header
-        style={{
-          padding: "22px 24px",
-          maxWidth: 1100,
-          width: "100%",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Link href="/" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}>
-          ← Back to shop
-        </Link>
-        <Link
-          href="/"
-          style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}
-        >
-          Lumière
-        </Link>
-        <div style={{ width: 90 }} />
-      </header>
-
       <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 20px 64px" }}>
         <div
           style={{
