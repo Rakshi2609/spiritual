@@ -507,3 +507,19 @@ section[id],
 .pay-btn:hover {
   background: #9c7a4e !important;
 }
+
+/* ---- cross-sell carousel (cart drawer) ---- */
+.cross-sell-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cross-sell-scroll::-webkit-scrollbar {
+  display: none;
+}
+.cross-sell-card {
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s ease;
+}
+.cross-sell-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(120, 92, 48, 0.16);
+}

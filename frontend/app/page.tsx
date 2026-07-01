@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useCart, useUser } from "./_components/store";
+import { CATALOG, HERO_IMG, money } from "./_components/catalog";
+import CrossSellCarousel from "./_components/CrossSellCarousel";
 
 /* ----------------------------------------------------------------------------
    Lumière landing page — ported from the bundled design artifact.
@@ -12,31 +14,6 @@ import { useCart, useUser } from "./_components/store";
 
 const SERIF = "var(--font-display), Georgia, serif";
 const SANS = "var(--font-body), -apple-system, sans-serif";
-
-type Product = {
-  id: string;
-  slot: string;
-  name: string;
-  desc: string;
-  price: number;
-  mrp: number;
-  stock: number;
-  tag: string;
-  ph: string;
-  img?: string;
-  href?: string;
-};
-
-const HERO_IMG = "/product_image/necklace.jpeg";
-
-const CATALOG: Product[] = [
-  { id: "om", slot: "p-om", name: "Om Pendant Chain", desc: "Oxidised silver ॐ on a box chain.", price: 2999, mrp: 3999, stock: 4, tag: "View in 3D ◈", ph: "Om pendant", img: HERO_IMG, href: "/product" },
-  { id: "amethyst", slot: "p-amethyst", name: "Amethyst Cluster", desc: "Raw geode for calm & clarity.", price: 3999, mrp: 5499, stock: 2, tag: "Best seller", ph: "Amethyst cluster", img: "/product_image/amethyst-cluster.jpg" },
-  { id: "sage", slot: "p-sage", name: "White Sage Bundle", desc: "Sustainably harvested smudge stick.", price: 1199, mrp: 1499, stock: 8, tag: "Restocked", ph: "Sage bundle", img: "/product_image/white-sage-bundle.webp" },
-  { id: "candle", slot: "p-candle", name: "Moonlight Candle", desc: "Soy wax, sandalwood & myrrh.", price: 2499, mrp: 2999, stock: 5, tag: "New", ph: "Soy candle", img: "/product_image/moonlight-candle.webp" },
-];
-
-const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 
 const MARQUEE_ITEMS = [
   "✦ Free ritual gift on orders over ₹5,000",
@@ -516,6 +493,7 @@ export default function Home() {
             ))
           )}
         </div>
+        <CrossSellCarousel variant="drawer" onAdded={showToast} />
         <div style={{ padding: "22px 28px 28px", borderTop: "1px solid #E3D6BD" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18, fontSize: 15 }}>
             <span style={{ color: "#6A5F4F", fontWeight: 300 }}>Subtotal</span>
