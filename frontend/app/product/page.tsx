@@ -7,6 +7,9 @@ import Link from "next/link";
 const PHOTO = "/product_image/necklace.jpeg";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useCart } from "../_components/store";
+import CrossSellCarousel from "../_components/CrossSellCarousel";
+import ProductReviews from "../_components/ProductReviews";
+import ProductFAQ, { type FaqItem } from "../_components/ProductFAQ";
 
 const SERIF = "var(--font-display), Georgia, serif";
 const SANS = "var(--font-body), -apple-system, sans-serif";
@@ -36,6 +39,25 @@ const PRODUCT = {
     "Tarnish-resistant · hypoallergenic",
   ],
 };
+
+const FAQ: FaqItem[] = [
+  {
+    q: "What is the chain length and material?",
+    a: "The pendant hangs on a 50cm oxidised 925 sterling silver box chain. It's tarnish-resistant and hypoallergenic, so it's comfortable for everyday wear.",
+  },
+  {
+    q: "How do I care for the oxidised finish?",
+    a: "Wipe gently with a soft, dry cloth after wear and store it away from moisture. Avoid silver dips or harsh polishes — they strip the antique oxidised detailing that gives the Om its depth.",
+  },
+  {
+    q: "Is it really cleansed and charged?",
+    a: "Yes — every piece is cleansed and left to charge under the full moon before it's packed. It arrives ready for your intention-setting or meditation practice.",
+  },
+  {
+    q: "What are the shipping and return options?",
+    a: "Free carbon-neutral shipping on orders over ₹2,499, with 7-day no-questions-asked returns. Your order is packed in recyclable, ritual-ready packaging.",
+  },
+];
 
 const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 
@@ -192,10 +214,10 @@ export default function ProductPage() {
             <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 16 }}>{PRODUCT.tagline}</p>
             <h1 className="pdp-title" style={{ fontFamily: SERIF, fontSize: 52, lineHeight: 1.05, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.5px", marginBottom: 18 }}>{PRODUCT.name}</h1>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+            <a href="#reviews" className="nav-link" style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 24, textDecoration: "none" }}>
               <span style={{ color: "#E4C188", letterSpacing: "2px", fontSize: 15 }}>★★★★★</span>
               <span style={{ fontSize: 13.5, color: "#8A7E6C" }}>{PRODUCT.rating} · {PRODUCT.reviews} reviews</span>
-            </div>
+            </a>
 
             <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 24 }}>
               <span style={{ fontSize: 30, color: "#2F2820", fontWeight: 500 }}>{money(PRODUCT.price)}</span>
@@ -236,6 +258,25 @@ export default function ProductPage() {
             </div>
           </div>
         </div>
+
+        {/* ---------- ratings & reviews ---------- */}
+        <section id="reviews" style={{ marginTop: 72, borderTop: "1px solid #E3D6BD", paddingTop: 48, scrollMarginTop: 90 }}>
+          <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 12 }}>Ratings &amp; reviews</p>
+          <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.3px", marginBottom: 32 }}>What the circle is saying</h2>
+          <ProductReviews productId={PRODUCT_ID} productName={PRODUCT.name} baseRating={PRODUCT.rating} baseCount={PRODUCT.reviews} onSubmitted={showToast} />
+        </section>
+
+        {/* ---------- people also like to buy ---------- */}
+        <section style={{ marginTop: 72, borderTop: "1px solid #E3D6BD", paddingTop: 48 }}>
+          <CrossSellCarousel variant="product" anchorId={PRODUCT_ID} onAdded={showToast} />
+        </section>
+
+        {/* ---------- faq ---------- */}
+        <section style={{ marginTop: 72, borderTop: "1px solid #E3D6BD", paddingTop: 48 }}>
+          <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 12 }}>Good to know</p>
+          <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.3px", marginBottom: 24 }}>Frequently asked questions</h2>
+          <ProductFAQ items={FAQ} />
+        </section>
       </div>
 
       {/* toast */}

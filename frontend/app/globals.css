@@ -523,3 +523,17 @@ section[id],
   transform: translateY(-3px);
   box-shadow: 0 14px 30px rgba(120, 92, 48, 0.16);
 }
+
+/* ---- product reviews + FAQ ---- */
+.review-star {
+  transition: transform 0.12s ease, color 0.15s ease;
+}
+.review-star:hover {
+  transform: scale(1.15);
+}
+@media (max-width: 720px) {
+  .pdp-reviews-grid {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+  }
+}

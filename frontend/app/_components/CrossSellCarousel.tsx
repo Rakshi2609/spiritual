@@ -38,21 +38,34 @@ const bundlePrice = (price: number) => Math.round(price * (1 - BUNDLE_EXTRA_PCT 
 
 type Props = {
   onAdded?: (name: string) => void;
-  variant?: "checkout" | "drawer";
+  variant?: "checkout" | "drawer" | "product";
+  /** For the "product" variant: derive recommendations from this product's pairings
+      instead of the cart contents. */
+  anchorId?: string;
 };
 
-export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Props) {
+export default function CrossSellCarousel({ onAdded, variant = "checkout", anchorId }: Props) {
   const { items, add } = useCart();
 
-  if (items.length === 0) return null;
+  const isProduct = variant === "product";
 
-  // Union the pairings for everything in the cart, drop what's already there,
-  // dedupe, and resolve to catalog products.
+  // The product variant works even with an empty cart; the others need cart items.
+  if (!isProduct && items.length === 0) return null;
+
+  // Build the source id list: from the anchor product's pairings (product variant)
+  // or from the union of pairings for everything in the cart. Drop anything already
+  // in the cart, dedupe, and resolve to catalog products.
   const inCart = new Set(items.map((i) => i.id));
   const recIds: string[] = [];
-  for (const line of items) {
-    for (const id of PAIRS[line.id] ?? []) {
+  if (isProduct) {
+    for (const id of PAIRS[anchorId ?? ""] ?? []) {
       if (!inCart.has(id) && !recIds.includes(id)) recIds.push(id);
+    }
+  } else {
+    for (const line of items) {
+      for (const id of PAIRS[line.id] ?? []) {
+        if (!inCart.has(id) && !recIds.includes(id)) recIds.push(id);
+      }
     }
   }
   const recs = recIds
@@ -61,12 +74,20 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
 
   if (recs.length === 0) return null;
 
-  const isCheckout = variant === "checkout";
-  const heading = isCheckout ? "People also bought these together" : "Frequently bought together";
-  const subheading = isCheckout
-    ? `Add one to your order for an extra ${BUNDLE_EXTRA_PCT}% off — your total updates instantly.`
-    : `Add one now and save an extra ${BUNDLE_EXTRA_PCT}%.`;
-  const ctaLabel = isCheckout ? "Add to Order" : "Add bundle";
+  const isDrawer = variant === "drawer";
+  const heading =
+    variant === "checkout"
+      ? "People also bought these together"
+      : isProduct
+      ? "People also like to buy"
+      : "Frequently bought together";
+  const subheading =
+    variant === "checkout"
+      ? `Add one to your order for an extra ${BUNDLE_EXTRA_PCT}% off — your total updates instantly.`
+      : isProduct
+      ? `Pair it with this and save an extra ${BUNDLE_EXTRA_PCT}%.`
+      : `Add one now and save an extra ${BUNDLE_EXTRA_PCT}%.`;
+  const ctaLabel = variant === "checkout" ? "Add to Order" : "Add bundle";
 
   const handleAdd = (p: Product) => {
     add({ id: p.id, name: p.name, price: bundlePrice(p.price), img: p.img }, 1);
@@ -82,7 +103,7 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
         overflowX: "auto",
         scrollSnapType: "x mandatory",
         WebkitOverflowScrolling: "touch",
-        padding: isCheckout ? "2px 2px 6px" : "2px 28px 8px",
+        padding: isDrawer ? "2px 28px 8px" : "2px 2px 6px",
       }}
     >
       {recs.map((p) => {
@@ -93,7 +114,7 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
             className="cross-sell-card"
             style={{
               flex: "0 0 auto",
-              width: isCheckout ? 168 : 156,
+              width: isDrawer ? 156 : 168,
               scrollSnapAlign: "start",
               background: "#FBF6EC",
               border: "1px solid #EADFC9",
@@ -104,7 +125,7 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
               boxShadow: "0 1px 2px rgba(120,92,48,0.04)",
             }}
           >
-            <div style={{ position: "relative", height: isCheckout ? 120 : 110, background: "#EDE2CC", overflow: "hidden" }}>
+            <div style={{ position: "relative", height: isDrawer ? 110 : 120, background: "#EDE2CC", overflow: "hidden" }}>
               {p.img && (
                 <Image src={p.img} alt={p.name} fill sizes="168px" style={{ objectFit: "cover" }} />
               )}
@@ -164,7 +185,17 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
     </div>
   );
 
-  const header = (
+  const header = isProduct ? (
+    <div style={{ marginBottom: 18 }}>
+      <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500, marginBottom: 10 }}>
+        You may also love
+      </p>
+      <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 500, color: "#2F2820", letterSpacing: "-0.3px" }}>
+        {heading}
+      </h2>
+      <div style={{ fontSize: 13.5, color: "#8A7E6C", marginTop: 6, fontWeight: 300 }}>{subheading}</div>
+    </div>
+  ) : (
     <div style={{ marginBottom: 14 }}>
       <div style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#B5894F", fontWeight: 500 }}>
         {heading}
@@ -173,7 +204,7 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
     </div>
   );
 
-  if (isCheckout) {
+  if (variant === "checkout") {
     return (
       <section
         style={{
@@ -188,6 +219,16 @@ export default function CrossSellCarousel({ onAdded, variant = "checkout" }: Pro
         {header}
         {cards}
       </section>
+    );
+  }
+
+  if (isProduct) {
+    // Plain block — the product page provides the surrounding section chrome.
+    return (
+      <div>
+        {header}
+        {cards}
+      </div>
     );
   }
 
