@@ -6,6 +6,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { useCart } from "./_components/store";
 import { CATALOG, HERO_IMG, money } from "./_components/catalog";
 import { useUI } from "./_components/ui";
+import ProductQuiz from "./_components/ProductQuiz";
 
 /* ----------------------------------------------------------------------------
    Lumière landing page — ported from the bundled design artifact.
@@ -292,6 +293,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* find-your-match quiz */}
+      <ProductQuiz />
 
       {/* ritual story */}
       <section id="ritual" className="reveal" style={{ background: "#ECE0C9" }}>

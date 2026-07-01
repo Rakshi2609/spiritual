@@ -537,3 +537,31 @@ section[id],
     gap: 36px !important;
   }
 }
+
+/* ---- find-your-match quiz ---- */
+.quiz-option {
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.quiz-option:hover {
+  border-color: #b5894f !important;
+  background: #f1e7d4 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(120, 92, 48, 0.1);
+}
+.quiz-option.selected {
+  border-color: #b5894f !important;
+  background: #f1e7d4 !important;
+}
+.quiz-fade {
+  animation: quizFade 0.32s ease;
+}
+@keyframes quizFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
