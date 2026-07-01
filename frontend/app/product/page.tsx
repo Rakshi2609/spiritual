@@ -10,6 +10,7 @@ import { useCart } from "../_components/store";
 import CrossSellCarousel from "../_components/CrossSellCarousel";
 import ProductReviews from "../_components/ProductReviews";
 import ProductFAQ, { type FaqItem } from "../_components/ProductFAQ";
+import CartDrawer from "../_components/CartDrawer";
 
 const SERIF = "var(--font-display), Georgia, serif";
 const SANS = "var(--font-body), -apple-system, sans-serif";
@@ -73,6 +74,7 @@ export default function ProductPage() {
   const { add, count } = useCart();
   const [view, setView] = useState("3d"); // the requested "3rd view" is active by default
   const [qty, setQty] = useState(1);
+  const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -101,10 +103,10 @@ export default function ProductPage() {
       <nav className="pdp-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 48px", maxWidth: 1280, margin: "0 auto" }}>
         <Link href="/" style={{ fontSize: 14, color: "#5A4F40", textDecoration: "none", letterSpacing: "0.6px" }}>← Back to shop</Link>
         <Link href="/" className="lp-logo" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 600, letterSpacing: "3px", color: "#3D352A", textDecoration: "none", textTransform: "uppercase" }}>Lumière</Link>
-        <Link href="/checkout" style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, color: "#3D352A", textDecoration: "none", minWidth: 110, justifyContent: "flex-end" }}>
+        <button onClick={() => setCartOpen(true)} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, color: "#3D352A", background: "none", border: "none", cursor: "pointer", fontFamily: SANS, textDecoration: "none", minWidth: 110, justifyContent: "flex-end" }}>
           Cart
           <span style={{ background: "#B5894F", color: "#fff", borderRadius: 999, minWidth: 21, height: 21, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, padding: "0 6px" }}>{count}</span>
-        </Link>
+        </button>
       </nav>
 
       <div className="pdp-wrap" style={{ maxWidth: 1280, margin: "0 auto", padding: "10px 48px 90px" }}>
@@ -278,6 +280,9 @@ export default function ProductPage() {
           <ProductFAQ items={FAQ} />
         </section>
       </div>
+
+      {/* cart drawer */}
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} onAdded={showToast} />
 
       {/* toast */}
       {toast && (
