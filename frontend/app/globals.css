@@ -565,3 +565,17 @@ section[id],
     transform: translateY(0);
   }
 }
+
+/* ---- chat assistant typing indicator ---- */
+@keyframes chatDot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}

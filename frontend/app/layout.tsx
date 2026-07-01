@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./_components/store";
 import { UIProvider } from "./_components/ui";
 import SiteHeader from "./_components/SiteHeader";
+import ChatAssistant from "./_components/ChatAssistant";
 
 // Premium editorial serif for headings/display
 const display = Fraunces({
@@ -40,6 +41,7 @@ export default function RootLayout({
           <UIProvider>
             <SiteHeader />
             {children}
+            <ChatAssistant />
           </UIProvider>
         </Providers>
       </body>
