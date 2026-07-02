@@ -124,20 +124,21 @@ export default function ProductQuiz() {
     <>
       {/* ---------- banner ---------- */}
       <section className="reveal">
-        <div className="quiz-banner" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
+        <div className="quiz-banner" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(18px, 5vw, 48px)" }}>
           <div
             style={{
               position: "relative",
               overflow: "hidden",
               borderRadius: 10,
-              padding: "clamp(36px, 6vw, 60px)",
+              padding: "clamp(28px, 6vw, 60px)",
               background: "radial-gradient(900px 400px at 15% 0%, #4A4030 0%, #2F2820 60%)",
               boxShadow: "0 24px 60px rgba(47,40,32,0.28)",
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
+              alignContent: "center",
               justifyContent: "space-between",
-              gap: 28,
+              gap: 24,
             }}
           >
             <div
