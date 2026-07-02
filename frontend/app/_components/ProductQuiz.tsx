@@ -152,14 +152,14 @@ export default function ProductQuiz() {
                 pointerEvents: "none",
               }}
             />
-            <div style={{ position: "relative", maxWidth: 560 }}>
-              <p style={{ fontSize: 13, letterSpacing: "3.5px", textTransform: "uppercase", color: "#E4C188", fontWeight: 500, marginBottom: 16 }}>
+            <div style={{ position: "relative", maxWidth: 560, flex: "1 1 300px", minWidth: 0 }}>
+              <p style={{ fontSize: "clamp(11px, 3vw, 13px)", letterSpacing: "3.5px", textTransform: "uppercase", color: "#E4C188", fontWeight: 500, marginBottom: 16 }}>
                 Not sure where to start?
               </p>
-              <h2 className="h-section" style={{ fontFamily: SERIF, fontSize: 44, lineHeight: 1.08, fontWeight: 500, color: "#F6EFE2", marginBottom: 16 }}>
+              <h2 className="h-section" style={{ fontFamily: SERIF, fontSize: "clamp(28px, 8vw, 44px)", lineHeight: 1.08, fontWeight: 500, color: "#F6EFE2", marginBottom: 16 }}>
                 Confused on what to buy?
               </h2>
-              <p style={{ fontSize: "16.5px", lineHeight: 1.7, color: "#C7B998", fontWeight: 300, maxWidth: 460 }}>
+              <p style={{ fontSize: "clamp(14px, 4vw, 16.5px)", lineHeight: 1.7, color: "#C7B998", fontWeight: 300, maxWidth: 460 }}>
                 Answer four quick questions and we&apos;ll match you with the ritual pieces made
                 for your intention.
               </p>
@@ -175,11 +175,11 @@ export default function ProductQuiz() {
                 border: "none",
                 cursor: "pointer",
                 fontFamily: SANS,
-                fontSize: 14,
+                fontSize: "clamp(12px, 3vw, 14px)",
                 letterSpacing: "1.5px",
                 textTransform: "uppercase",
                 fontWeight: 500,
-                padding: "18px 40px",
+                padding: "clamp(14px, 3vw, 18px) clamp(24px, 5vw, 40px)",
                 borderRadius: 3,
                 boxShadow: "0 12px 30px rgba(200,168,124,0.35)",
               }}
